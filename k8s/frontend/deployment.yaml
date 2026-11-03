@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: zuri-market
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/leon-aka-10/zuri-market-capstone-frontend:sha-e17751f8c875a86bf6a91edb479c919d1e760af4433e3f0a58d0f64a618416e9
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /, port: http }
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 10
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: nginx-conf
+          configMap: { name: frontend-nginx }
