@@ -1,0 +1,99 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font: "Inter", sans-serif;
+  --bg: #f9f9f7;
+  --bg-card: #ffffff;
+  --bg-secondary: #f1f0ec;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b6b6b;
+  --text-hint: #9e9e9e;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.18);
+  --accent: #d85a30;
+  --accent-light: #faece7;
+  --accent-text: #993c1d;
+  --success: #0f6e56;
+  --success-light: #e1f5ee;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: var(--radius-full);
+}
+
+/* Utility */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  text-transform: lowercase;
+  letter-spacing: 0.2px;
+}
+
+.badge--new {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.badge--bestseller {
+  background: var(--accent-light);
+  color: var(--accent-text);
+}
+
+/* Cart overlay backdrop */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 40;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
