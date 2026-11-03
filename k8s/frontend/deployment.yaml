@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/leon-aka-10/zuri-market-capstone-frontend:sha-e17751f8c875a86bf6a91edb479c919d1e760af4433e3f0a58d0f64a618416e9
+          image: ghcr.io/leon-aka-10/zuri-market-capstone-frontend:sha-1a1a60c
           ports:
             - name: http
               containerPort: 8080
