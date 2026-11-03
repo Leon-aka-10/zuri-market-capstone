@@ -3,10 +3,10 @@ FROM node:22-alpine
 # Patch Alpine OS packages
 RUN apk upgrade --no-cache
 
-# Install a pinned npm version without lifecycle scripts
-RUN npm install --global --ignore-scripts npm@11.6.2
+# Install pinned npm version and clean installation cache
+RUN npm install --global --ignore-scripts npm@11.21.1 \
+    && npm cache clean --force
 
-# Application environment
 ENV NODE_ENV=production
 
 WORKDIR /app
@@ -14,7 +14,7 @@ WORKDIR /app
 # Copy dependency manifests
 COPY package.json package-lock.json ./
 
-# Install production dependencies without lifecycle scripts
+# Install production dependencies securely
 RUN npm ci --omit=dev --ignore-scripts
 
 # Copy application source
@@ -26,4 +26,3 @@ USER node
 EXPOSE 5000
 
 CMD ["node", "server.js"]
-
