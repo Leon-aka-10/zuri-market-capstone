@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: backend
-          image: ghcr.io/leon-aka-10/zuri-market-capstone-backend:sha-da41c03b445620aacae1be842c02c58e64793ee1eb7df314bda6e14b25767716
+          image: ghcr.io/leon-aka-10/zuri-market-capstone-backend:sha-1a1a60c
           ports:
             - name: http
               containerPort: 5000
