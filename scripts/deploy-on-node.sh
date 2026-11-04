@@ -17,7 +17,28 @@ kubectl get nodes | grep -qw Ready
 
 kubectl apply -f k8s/namespace.yaml -f k8s/rbac.yaml
 ./scripts/sync-secrets.sh "$ENV_NAME"
-kubectl apply -f k8s/backend/ -f k8s/frontend/ -f k8s/ingress.yaml
+
+# ---------------------------------------------------------------- argocd
+echo "Installing ArgoCD..."
+kubectl get namespace argocd >/dev/null 2>&1 || kubectl create namespace argocd
+# server-side apply: the ApplicationSet CRD is too large for client-side apply
+kubectl apply --server-side --force-conflicts -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.6.0/manifests/install.yaml
+# trim for a small node: these components are not used here
+kubectl -n argocd scale deployment argocd-dex-server argocd-notifications-controller argocd-applicationset-controller --replicas=0 || true
+kubectl wait --for condition=established --timeout=120s crd/applications.argoproj.io
+kubectl -n argocd rollout status deployment/argocd-server --timeout=300s
+kubectl -n argocd rollout status deployment/argocd-repo-server --timeout=300s
+kubectl -n argocd rollout status statefulset/argocd-application-controller --timeout=300s
+kubectl apply -f argocd/
+
+echo "Waiting for ArgoCD to sync the applications (up to 10 min)..."
+for _ in $(seq 1 60); do
+  st=$(kubectl -n argocd get applications.argoproj.io \
+        -o jsonpath='{range .items[*]}{.metadata.name}={.status.sync.status}/{.status.health.status} {end}' 2>/dev/null || true)
+  echo "$st"
+  case "$st" in *OutOfSync*|*Progressing*|*Missing*|*Degraded*|"") sleep 10 ;; *) break ;; esac
+done
 kubectl -n zuri-market rollout status deployment/backend --timeout=300s
 kubectl -n zuri-market rollout status deployment/frontend --timeout=300s
 kubectl -n zuri-market get pods
