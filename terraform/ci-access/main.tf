@@ -7,6 +7,11 @@ provider "aws" {
 
 variable "region" { type = string }
 variable "repo" { type = string } # exact case, e.g. Leon-aka-10/zuri-market-capstone
+variable "repo_id_subject" {
+  type        = string
+  description = "ID-based subject GitHub emits for this repo: <owner>@<owner_id>/<repo>@<repo_id>"
+  default     = "Leon-aka-10@85785527/zuri-market-capstone@1443913536"
+}
 variable "create_oidc_provider" { type = bool }
 
 data "aws_caller_identity" "me" {}
@@ -43,7 +48,10 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.repo}:ref:refs/heads/main"]
+      values = [
+        "repo:${var.repo}:ref:refs/heads/main",
+        "repo:${var.repo_id_subject}:ref:refs/heads/main",
+      ]
     }
   }
 }
