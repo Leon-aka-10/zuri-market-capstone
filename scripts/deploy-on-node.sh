@@ -21,3 +21,26 @@ kubectl apply -f k8s/backend/ -f k8s/frontend/ -f k8s/ingress.yaml
 kubectl -n zuri-market rollout status deployment/backend --timeout=300s
 kubectl -n zuri-market rollout status deployment/frontend --timeout=300s
 kubectl -n zuri-market get pods
+
+# ------------------------------------------------------------- monitoring
+echo "Installing or upgrading the monitoring stack..."
+kubectl get namespace monitoring >/dev/null 2>&1 || kubectl create namespace monitoring
+kubectl -n monitoring get secret grafana-admin >/dev/null 2>&1 || \
+  kubectl -n monitoring create secret generic grafana-admin \
+    --from-literal=admin-user=admin \
+    --from-literal=admin-password="$(openssl rand -hex 16)"
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts >/dev/null 2>&1 || true
+helm repo update >/dev/null
+helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+  -n monitoring -f monitoring/values.yaml --wait --timeout 10m
+
+# CRDs exist now, so the ServiceMonitor can be applied
+kubectl apply -f monitoring/servicemonitor-backend.yaml
+
+# Dashboard as code: the Grafana sidecar loads ConfigMaps labelled grafana_dashboard=1
+kubectl -n monitoring create configmap zuri-dashboard \
+  --from-file=monitoring/dashboards/zuri-overview.json --dry-run=client -o yaml \
+  | kubectl label --local -f - grafana_dashboard=1 -o yaml \
+  | kubectl apply -f -
+kubectl -n monitoring get pods
