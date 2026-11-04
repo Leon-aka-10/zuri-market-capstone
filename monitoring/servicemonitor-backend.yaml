@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend
+  namespace: zuri-market
+spec:
+  selector:
+    matchLabels: { app: backend }
+  endpoints:
+    - port: http          # the named port on the backend Service
+      path: /metrics
+      interval: 15s
